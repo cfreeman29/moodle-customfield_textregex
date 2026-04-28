@@ -35,7 +35,7 @@ use core_customfield\field_controller;
 use core_customfield\field_config_form;
 use stdClass;
 use coding_exception;
-use moodle_exception;
+use core\exception\moodle_exception;
 
 /**
  * Functional test for 'customfield_textregex'

@@ -98,8 +98,6 @@ class field_controller extends \core_customfield\field_controller {
      * @throws coding_exception
      */
     public function config_form_validation(array $data, $files = []): array {
-        global $CFG;
-
         $errors = parent::config_form_validation($data, $files);
 
         if (preg_match($data['configdata']['regex'], '') === false) {
@@ -119,12 +117,14 @@ class field_controller extends \core_customfield\field_controller {
         if (isset($data['configdata']['link'])) {
             $link = $data['configdata']['link'];
             if (strlen($link)) {
-                require_once($CFG->dirroot . '/lib/validateurlsyntax.php');
                 if (strpos($link, '$$') === false) {
                     $errors['configdata[link]'] = get_string('errorconfiglinkplaceholder', 'customfield_textregex');
-                } else if (!validateUrlSyntax(str_replace('$$', 'XYZ', $link), 's+H?S?F-E-u-P-a?I?p?f?q?r?')) {
-                    // This validation is more strict than PARAM_URL - it requires the protocol and it must be either http or https.
-                    $errors['configdata[link]'] = get_string('errorconfiglinksyntax', 'customfield_textregex');
+                } else {
+                    $testurl = str_replace('$$', 'XYZ', $link);
+                    $cleaned = clean_param($testurl, PARAM_URL);
+                    if (empty($cleaned) || !preg_match('/^https?:\/\//i', $cleaned)) {
+                        $errors['configdata[link]'] = get_string('errorconfiglinksyntax', 'customfield_textregex');
+                    }
                 }
             }
         }
